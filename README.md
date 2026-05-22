@@ -2,6 +2,11 @@
 
 > 仿小智客户端 xiaozhi-esp32 实现的 Flutter 跨平台移动端 APP，与小智平台通信遵循小智协议
 
+作者：凌封  
+作者主页：[https://fengin.cn](https://fengin.cn/)  
+AI 全书：[https://aibook.ren](https://aibook.ren/)  
+GitHub：https://github.com/fengin/xiaoxin-app
+
 ## 项目简介
 
 小新 APP 是一个基于 Flutter 开发的跨平台语音交互客户端，实现了与 [xiaozhi-esp32](https://github.com/78/xiaozhi-esp32) 相同的通信协议，可连接 xiaozhi-esp32-server-java/python/golang 后端服务。
@@ -197,7 +202,7 @@ flutter run
 
 ### 界面切换（H5 / Native）
 
-本项目同时支持 **H5 容器界面（示例）** 与 **原生语音对话界面（示例）**。您可以在 [loading_page.dart](file:///d:/code/work/xiaoxin/xiaoxin-app-opensource/lib/ui/pages/loading_page.dart) 中，通过切换目标页面来更改应用的默认启动主界面：
+本项目同时支持 **H5 容器界面（示例）** 与 **原生语音对话界面（示例）**。您可以在 [loading_page.dart](lib/ui/pages/loading_page.dart) 中，通过切换目标页面来更改应用的默认启动主界面：
 
 ```dart
 // lib/ui/pages/loading_page.dart
