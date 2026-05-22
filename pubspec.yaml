@@ -1,0 +1,121 @@
+name: xiaoxin
+description: "XiaoXin APP - Flutter voice client for XiaoXin ecosystem"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI
+  cupertino_icons: ^1.0.8
+
+  # 语音引擎 - VAD + KWS
+  # 精确锁定版本，避免 caret 自动升级到含新 onnxruntime 的版本
+  # 历史问题：
+  #   1) ^1.10.35 解析后主包 1.10.35 + native 1.12.36 错配，触发 strlen 空指针崩溃
+  #   2) 1.13.x 内置的新 onnxruntime（armeabi-v7a libonnxruntime.so 约 18MB）在
+  #      ceres 平台等部分 ARMv7 设备上触发 SIGBUS / BUS_ADRALN 对齐错
+  # 因此锁定 1.12.23（alpha 包同款，含旧 11MB onnxruntime，已验证可在目标设备运行）
+  sherpa_onnx: 1.12.23
+
+  # Opus 编解码
+  opus_flutter: ^3.0.3
+  opus_dart: ^3.0.1
+
+  # WebSocket 通信
+  web_socket_channel: ^3.0.2
+
+  # WebView H5 容器
+  webview_flutter: ^4.10.0
+
+  # 外部链接打开（Safari）
+  url_launcher: ^6.3.1
+
+  # PCM 音频流直接播放
+  flutter_pcm_sound: ^3.3.3
+
+  # 音频录制
+  record: ^6.0.0
+
+  # 后台服务
+  flutter_background_service: ^5.0.13
+  flutter_local_notifications: ^18.0.1
+
+  # 状态管理
+  flutter_riverpod: ^2.6.1
+
+  # 权限管理
+  permission_handler: ^11.3.1
+
+  # 网络请求
+  dio: ^5.7.0
+
+  # 本地存储
+  shared_preferences: ^2.3.4
+  flutter_secure_storage: ^9.2.2
+
+  # 日志
+  logger: ^2.5.0
+
+  # 路径
+  path_provider: ^2.1.5
+
+  # 设备信息
+  device_info_plus: ^12.3.0
+
+  # 音量控制
+  volume_controller: ^2.0.8
+
+  # 屏幕亮度控制
+  screen_brightness: ^1.0.1
+
+  # 屏幕常亮
+  wakelock_plus: ^1.2.10
+
+  # UUID 生成
+  uuid: ^4.5.1
+  package_info_plus: ^9.0.0
+  http: ^1.6.0
+  audio_session: ^0.1.25
+  crypto: ^3.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  change_app_package_name: ^1.5.0
+  flutter_launcher_icons: ^0.13.1
+  rename: ^3.0.2
+
+# 强制 sherpa_onnx 各平台 native 子包与主包一致为 1.12.23
+# 主包 1.12.23 的 pubspec 用 caret (^1.12.23) 引用子包，会被解析到 1.12.36（含新 18MB onnxruntime）
+# 这里钉死到 1.12.23 保证 armeabi-v7a 上的 libonnxruntime.so 仍是旧 11MB 版本
+# 注意：1.12.x 系列使用合并包 sherpa_onnx_android（包含全部 4 个 ABI），
+# 而不是 1.13.x 的 _armeabi / _arm64 / _x86 / _x86_64 拆分子包
+dependency_overrides:
+  sherpa_onnx_android: 1.12.23
+  sherpa_onnx_ios: 1.12.23
+  sherpa_onnx_linux: 1.12.23
+  sherpa_onnx_macos: 1.12.23
+  sherpa_onnx_windows: 1.12.23
+
+# flutter_launcher_icons 配置
+flutter_launcher_icons:
+  android: "mipmap"
+  ios: true
+  image_path: "assets/icon/standard.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    # Sherpa-ONNX 模型文件
+    - assets/models/
+    # 音频资源
+    - assets/sounds/
+    # H5 资源
+    - assets/web/

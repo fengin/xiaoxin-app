@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>小新 H5 Demo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0e17;
+      background-image:
+        radial-gradient(ellipse at 20% 80%, rgba(0, 150, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(0, 255, 200, 0.06) 0%, transparent 50%);
+      min-height: 100vh;
+      color: #e0e6ed;
+      font-size: 13px;
+      overflow: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+    }
+
+    .status-panel {
+      flex: 0 0 auto;
+    }
+
+    .chat-panel {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .control-panel {
+      flex: 0 0 auto;
+    }
+
+    @media (min-width: 768px) and (orientation: landscape) {
+      .app-container {
+        flex-direction: row;
+      }
+
+      .status-panel {
+        flex: 0 0 28%;
+      }
+
+      .chat-panel {
+        flex: 1 1 auto;
+      }
+
+      .control-panel {
+        flex: 0 0 22%;
+      }
+    }
+
+    .panel {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(0, 200, 255, 0.15);
+    }
+
+    @media (min-width: 768px) and (orientation: landscape) {
+      .panel {
+        border-bottom: none;
+        border-right: 1px solid rgba(0, 200, 255, 0.15);
+      }
+
+      .control-panel {
+        border-right: none;
+      }
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #00d4ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(0, 200, 255, 0.1);
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .status-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(0, 200, 255, 0.08);
+      border-radius: 4px;
+      padding: 6px;
+      text-align: center;
+    }
+
+    .status-label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 2px;
+    }
+
+    .status-value {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-value.on {
+      color: #00ff88;
+    }
+
+    .status-value.off {
+      color: #6b7280;
+    }
+
+    .status-value.idle {
+      color: #fbbf24;
+    }
+
+    .status-value.connecting {
+      color: #3b82f6;
+    }
+
+    .status-value.listening {
+      color: #ef4444;
+    }
+
+    .status-value.speaking {
+      color: #a855f7;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      cursor: pointer;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .log-list {
+      max-height: 70px;
+      overflow-y: auto;
+      font-size: 10px;
+      font-family: monospace;
+    }
+
+    .log-list.collapsed {
+      max-height: 0;
+      overflow: hidden;
+    }
+
+    .log-item {
+      padding: 2px 0;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .log-item .time {
+      color: rgba(255, 255, 255, 0.3);
+      margin-right: 4px;
+    }
+
+    .log-item.kws {
+      color: #00ff88;
+    }
+
+    .log-item.listen {
+      color: #ef4444;
+    }
+
+    .log-item.tts {
+      color: #a855f7;
+    }
+
+    .log-item.state {
+      color: #3b82f6;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .message {
+      margin-bottom: 8px;
+    }
+
+    .message-bubble {
+      max-width: 88%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .message.user .message-bubble {
+      background: linear-gradient(135deg, #0066cc, #0088ff);
+      margin-left: auto;
+      border-bottom-right-radius: 2px;
+    }
+
+    .message.assistant .message-bubble {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(0, 200, 255, 0.1);
+      margin-right: auto;
+      border-bottom-left-radius: 2px;
+    }
+
+    .message-label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 2px;
+    }
+
+    .message.user .message-label {
+      text-align: right;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .control-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(0, 200, 255, 0.08);
+      border-radius: 4px;
+      padding: 10px 6px;
+      text-align: center;
+    }
+
+    .control-icon {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .control-title {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 6px;
+    }
+
+    .toggle-btn {
+      width: 100%;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .toggle-btn.on {
+      background: linear-gradient(135deg, #00cc66, #00ff88);
+      color: #0a0e17;
+    }
+
+    .toggle-btn.off {
+      background: rgba(255, 255, 255, 0.1);
+      color: #9ca3af;
+    }
+
+    .toggle-btn:disabled {
+      opacity: 0.4;
+    }
+
+    .toggle-btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <section class="panel status-panel">
+      <div class="panel-title">📊 状态</div>
+      <div class="status-grid">
+        <div class="status-item">
+          <div class="status-label">KWS</div>
+          <div class="status-value off" id="kws-status">关</div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">VAD</div>
+          <div class="status-value off" id="vad-status">关</div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">会话</div>
+          <div class="status-value idle" id="session-status">待机</div>
+        </div>
+      </div>
+      <div class="log-header" onclick="toggleLogs()">
+        <span>📝 日志</span>
+        <span id="log-toggle">▼</span>
+      </div>
+      <div class="log-list" id="log-list"></div>
+    </section>
+
+    <section class="panel chat-panel" style="display:flex;flex-direction:column;">
+      <div class="panel-title">💬 对话</div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="message assistant">
+          <div class="message-label">助手</div>
+          <div class="message-bubble">开启热词后说"小新小新"开始对话</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel control-panel">
+      <div class="panel-title">🎛️ 控制</div>
+      <div class="control-grid">
+        <div class="control-item">
+          <div class="control-icon">🎙️</div>
+          <div class="control-title">热词监听</div>
+          <button class="toggle-btn off" id="btn-kws" onclick="toggleKws()">开启</button>
+        </div>
+        <div class="control-item">
+          <div class="control-icon">🗣️</div>
+          <div class="control-title">语音会话</div>
+          <button class="toggle-btn off" id="btn-voice" onclick="toggleVoice()">开启</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    var AppState = {
+      bridgeReady: false,
+      sessionState: 'idle',
+      kwsEnabled: false,
+      vadEnabled: false,
+      isVoiceActive: false,
+      currentAiResponse: '',
+      lastSentence: '',
+      currentAiMessageDiv: null,
+      logs: [],
+      logsExpanded: true,
+      lastSttText: ''
+    };
+
+    function waitForBridge() {
+      if (window.XiaoXin) onBridgeReady();
+      else {
+        window.addEventListener('xiaoxin:ready', onBridgeReady);
+        window.onXiaoXinReady = onBridgeReady;
+      }
+    }
+
+    function onBridgeReady() {
+      AppState.bridgeReady = true;
+      addLog('state', 'Bridge就绪');
+
+      // 设置测试业务参数
+      setTestVoiceParams();
+
+      XiaoXin.getState(function (ok, data) {
+        if (ok) {
+          updateSessionState(data.state);
+          updateKwsState(data.kwsEnabled);
+          updateVadState(data.vadEnabled);
+        }
+      });
+
+      registerEvents();
+    }
+
+    function setTestVoiceParams() {
+      if (!XiaoXin.setVoiceParams) return;
+
+      var now = new Date();
+      var timeStr = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0') + ':' +
+        String(now.getHours()).padStart(2, '0') + ':' +
+        String(now.getMinutes()).padStart(2, '0') + ':' +
+        String(now.getSeconds()).padStart(2, '0');
+
+      var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+
+      var params = {
+        //clientId: uuid,
+        //start_time: timeStr,
+        //buildingId: "2020711143427379202",
+        //authorization: "bearer 229f5d9d-44bc-47cd-b14c-b9e129ee1fc7"
+      };
+
+      XiaoXin.setVoiceParams(params, function (success, data) {
+        if (success) {
+          addLog('state', '参数已设置');
+          console.log('Voice params set:', params);
+        }
+      });
+    }
+
+    function registerEvents() {
+      // 会话状态变化
+      XiaoXin.on('onStateChange', function (data) {
+        updateSessionState(data.state);
+        addLog('state', getStateText(data.state));
+      });
+
+      // KWS 状态变化（直接从引擎同步）
+      XiaoXin.on('onKwsStateChange', function (data) {
+        updateKwsState(data.enabled);
+        addLog('kws', 'KWS ' + (data.enabled ? '开' : '关'));
+      });
+
+      // VAD 状态变化（直接从引擎同步）
+      XiaoXin.on('onVadStateChange', function (data) {
+        updateVadState(data.enabled);
+        addLog('listen', 'VAD ' + (data.enabled ? '开' : '关'));
+      });
+
+      // STT 去重
+      XiaoXin.on('onSttText', function (data) {
+        if (data.text && data.text !== AppState.lastSttText) {
+          AppState.lastSttText = data.text;
+          addUserMessage(data.text);
+          addLog('listen', 'STT');
+        }
+      });
+
+      XiaoXin.on('onTtsStart', function () {
+        AppState.currentAiResponse = '';
+        AppState.lastSentence = '';
+        AppState.currentAiMessageDiv = null;
+        AppState.lastSttText = '';
+        addLog('tts', 'TTS开始');
+      });
+
+      XiaoXin.on('onTtsSentence', function (data) {
+        handleTtsSentence(data.text);
+      });
+
+      XiaoXin.on('onTtsStop', function () {
+        finalizeTtsResponse();
+        addLog('tts', 'TTS结束');
+      });
+    }
+
+    function updateSessionState(state) {
+      AppState.sessionState = state;
+      var el = document.getElementById('session-status');
+      el.textContent = getStateText(state);
+      el.className = 'status-value ' + state;
+
+      var btn = document.getElementById('btn-voice');
+      if (state === 'listening' || state === 'speaking') {
+        AppState.isVoiceActive = true;
+        btn.textContent = '关闭';
+        btn.className = 'toggle-btn on';
+      } else if (state === 'idle') {
+        AppState.isVoiceActive = false;
+        btn.textContent = '开启';
+        btn.className = 'toggle-btn off';
+      } else if (state === 'connecting') {
+        btn.textContent = '...';
+        btn.disabled = true;
+      }
+      if (state !== 'connecting') btn.disabled = false;
+    }
+
+    function updateKwsState(enabled) {
+      AppState.kwsEnabled = enabled;
+      var el = document.getElementById('kws-status');
+      el.textContent = enabled ? '开' : '关';
+      el.className = 'status-value ' + (enabled ? 'on' : 'off');
+      var btn = document.getElementById('btn-kws');
+      btn.textContent = enabled ? '关闭' : '开启';
+      btn.className = 'toggle-btn ' + (enabled ? 'on' : 'off');
+    }
+
+    function updateVadState(enabled) {
+      AppState.vadEnabled = enabled;
+      var el = document.getElementById('vad-status');
+      el.textContent = enabled ? '开' : '关';
+      el.className = 'status-value ' + (enabled ? 'on' : 'off');
+    }
+
+    function addUserMessage(text) {
+      var c = document.getElementById('chat-messages');
+      var d = document.createElement('div');
+      d.className = 'message user';
+      d.innerHTML = '<div class="message-label">你</div><div class="message-bubble">' + escapeHtml(text) + '</div>';
+      c.appendChild(d);
+      c.scrollTop = c.scrollHeight;
+    }
+
+    function handleTtsSentence(text) {
+      if (AppState.lastSentence) {
+        AppState.currentAiResponse = AppState.currentAiResponse.replace(/\.{3}$/, '');
+        var lc = AppState.lastSentence.slice(-1);
+        if (/[。！？，、]/.test(lc)) AppState.currentAiResponse += lc;
+      }
+      AppState.lastSentence = text;
+      AppState.currentAiResponse += text.replace(/[。！？，、]+$/, '') + '...';
+      updateAiMessage(AppState.currentAiResponse);
+    }
+
+    function finalizeTtsResponse() {
+      if (!AppState.currentAiResponse) return;
+      AppState.currentAiResponse = AppState.currentAiResponse.replace(/\.{3}$/, '');
+      if (AppState.lastSentence) {
+        var lc = AppState.lastSentence.slice(-1);
+        if (/[。！？，、]/.test(lc)) AppState.currentAiResponse += lc;
+      }
+      updateAiMessage(AppState.currentAiResponse);
+      AppState.currentAiResponse = '';
+      AppState.lastSentence = '';
+      AppState.currentAiMessageDiv = null;
+    }
+
+    function updateAiMessage(text) {
+      var c = document.getElementById('chat-messages');
+      if (AppState.currentAiMessageDiv) {
+        AppState.currentAiMessageDiv.querySelector('.message-bubble').textContent = text;
+      } else {
+        var d = document.createElement('div');
+        d.className = 'message assistant';
+        d.innerHTML = '<div class="message-label">助手</div><div class="message-bubble">' + escapeHtml(text) + '</div>';
+        c.appendChild(d);
+        AppState.currentAiMessageDiv = d;
+      }
+      c.scrollTop = c.scrollHeight;
+    }
+
+    function addLog(type, msg) {
+      var time = new Date().toTimeString().slice(0, 5);
+      AppState.logs.push({ type: type, msg: msg, time: time });
+      if (AppState.logs.length > 30) AppState.logs.shift();
+      renderLogs();
+    }
+
+    function renderLogs() {
+      var list = document.getElementById('log-list');
+      var logs = AppState.logsExpanded ? AppState.logs.slice(-8) : AppState.logs.slice(-3);
+      var html = '';
+      for (var i = 0; i < logs.length; i++) {
+        var l = logs[i];
+        html += '<div class="log-item ' + l.type + '"><span class="time">' + l.time + '</span>' + escapeHtml(l.msg) + '</div>';
+      }
+      list.innerHTML = html;
+      list.scrollTop = list.scrollHeight;
+    }
+
+    function toggleKws() {
+      if (!AppState.bridgeReady) return;
+      if (AppState.kwsEnabled) XiaoXin.stopKws();
+      else XiaoXin.startKws();
+    }
+
+    function toggleVoice() {
+      if (!AppState.bridgeReady) return;
+      if (AppState.isVoiceActive) XiaoXin.stopVoice();
+      else { clearChat(); XiaoXin.startVoice({}); }
+    }
+
+    function toggleLogs() {
+      AppState.logsExpanded = !AppState.logsExpanded;
+      document.getElementById('log-toggle').textContent = AppState.logsExpanded ? '▲' : '▼';
+      document.getElementById('log-list').classList.toggle('collapsed', !AppState.logsExpanded);
+      renderLogs();
+    }
+
+    function getStateText(s) {
+      var m = { idle: '待机', connecting: '连接', listening: '聆听', speaking: '播放', error: '错误' };
+      return m[s] || s;
+    }
+
+    function escapeHtml(t) {
+      var d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
+    }
+
+    function clearChat() {
+      document.getElementById('chat-messages').innerHTML = '';
+      AppState.lastSttText = '';
+    }
+
+    waitForBridge();
+  </script>
+</body>
+
+</html>
