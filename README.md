@@ -1,4 +1,4 @@
-# 小新 APP (Xiaoxin App)
+# <p align="center"><img src="assets/icon/standard.png" width="128" height="128"><br>小新 APP (Xiaoxin App)</p>
 
 > 仿小智客户端 xiaozhi-esp32 实现的 Flutter 跨平台移动端 APP，与小智平台通信遵循小智协议
 
