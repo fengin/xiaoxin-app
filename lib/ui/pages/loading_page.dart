@@ -8,6 +8,7 @@ import '../../core/session_manager.dart';
 import '../../utils/logger.dart';
 // 目标页面（手动切换）
 import 'h5_container_page.dart';
+import 'demo_native_page.dart';
 
 /// 启动加载页
 /// 
@@ -68,9 +69,9 @@ class _LoadingPageState extends State<LoadingPage> {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => const H5ContainerPage(),
             // 📌 切换目标页：H5ContainerPage (生产) 或 DemoNativePage (调试)
-            //builder: (_) => const DemoNativePage(),
+            //builder: (_) => const H5ContainerPage(),
+            builder: (_) => const DemoNativePage(),
           ),
         );
       }

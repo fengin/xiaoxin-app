@@ -3,7 +3,6 @@
 library;
 
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -149,14 +148,13 @@ class _H5ContainerPageState extends State<H5ContainerPage> {
             
             if (!isCriticalError) {
               final url = error.url?.toLowerCase() ?? '';
-              // 对于 SPA，关键资源如 JS 失败会引起路由崩溃白屏。在此触发一次对服务器 TCP 连通性的探活检测。
               if (url.endsWith('.js') || url.endsWith('.css')) {
-                _checkServerConnectivityAndReport();
+                AppLogger.w('H5Container critical subresource load failed: ${error.url} ${error.description}');
+              } else {
+                AppLogger.w('H5Container subresource error ignored: ${error.url} ${error.description}');
               }
-              AppLogger.w('H5Container subresource error ignored initially: ${error.url} ${error.description}');
               return;
             }
-
             _cancelTimeoutTimer();
             AppLogger.e('H5Container error: ${error.description}, type: ${error.errorType}');
             setState(() {
@@ -200,19 +198,6 @@ class _H5ContainerPageState extends State<H5ContainerPage> {
         'XiaoXinBridge',
         onMessageReceived: (message) {
           AppLogger.d('JS Bridge message: ${message.message}');
-          // 拦截前端主动发来的严重错误（如断网导致的渲染崩溃）
-          if (message.message.contains('"type":"sys_fatal_error"')) {
-            if (mounted) {
-              _cancelTimeoutTimer();
-              setState(() {
-                _hasError = true;
-                _errorType = H5ErrorType.network;
-                _errorMessage = '网络连接断开，页面资源加载失败';
-              });
-              _startAutoRetryTimer();
-            }
-            return;
-          }
           JsBridgeHandler.instance.handleMessage(message.message);
         },
       );
@@ -654,35 +639,6 @@ class _H5ContainerPageState extends State<H5ContainerPage> {
     _adminLongPressTimer = null;
     _adminPointerId = null;
     _adminLongPressTriggered = false;
-  }
-
-  /// 在后台默默做一次对 H5 服务器的 TCP 连接探测
-  /// 如果连不上，说明网络彻底断开或服务端宕机，主动触发原生网络错误页面。
-  Future<void> _checkServerConnectivityAndReport() async {
-    if (_hasError) return;
-
-    try {
-      final uri = Uri.parse(_targetUrl);
-      int port = uri.port;
-      if (port == 0 || port == -1) {
-        port = (uri.scheme == 'https') ? 443 : 80;
-      }
-      // 尝试建立 TCP 连接，2 秒超时。若成功则立即销毁
-      final socket = await Socket.connect(uri.host, port, timeout: const Duration(seconds: 2));
-      socket.destroy();
-      AppLogger.i('Connectivity check passed, server ${uri.host}:$port is reachable.');
-    } catch (e) {
-      AppLogger.e('Connectivity check failed: $e');
-      if (mounted && !_hasError) {
-        _cancelTimeoutTimer();
-        setState(() {
-          _hasError = true;
-          _errorType = H5ErrorType.network;
-          _errorMessage = '无法连接到服务器，请检查网络设置';
-        });
-        _startAutoRetryTimer();
-      }
-    }
   }
 
   /// 进入错误页后，每 30 秒自动尝试重新加载页面。

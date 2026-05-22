@@ -1,6 +1,5 @@
 /// XiaoXin APP - OTA 服务
 /// 调用 OTA 接口进行设备授权和获取配置
-/// 请求体格式参考 xiaozhi-esp32 的 GetSystemInfoJson()
 library;
 
 import 'dart:convert';

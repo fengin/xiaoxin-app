@@ -7,6 +7,7 @@
 ## [1.0.0+1] - 2026-05-22
 
 ### Added
+
 - **全新开源首发**：正式公开发布小新 APP 语音对话客户端源代码。
 - **端侧 AI 语音链路**：集成了基于 `Sherpa-ONNX` 的中文 Zipformer KWS (热词唤醒) 及 `Silero VAD` (语音活动检测) 高性能离线端侧推理链路，首发自带 13MB 级极致精简的端侧模型包。
 - **Opus 流式传输**：实现本地 PCM 采样、Opus 流式双向编解码与播放，完美匹配服务端进行超低延迟语音交互。
@@ -14,7 +15,4 @@
 - **多环境自适应**：保留多环境架构（测试/预发/生产），置空带内部语义的配置默认值，首次启动在无可用远程 H5 地址时自动平滑 fallback 至本地 `assets/web/demo.html` 演示页，极大地提升了开箱即用的稳定性。
 - **文档体系建设**：提供了详细的 [H5_VOICE_SDK.md](H5_VOICE_SDK.md) 原生扩展接口手册、[语音对话技术说明.md](语音对话技术说明.md) 架构指南、[MODEL_LICENSES.md](MODEL_LICENSES.md) 及 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) 合规清单。
 
-### Removed
-- **业务性 Kiosk 去除**：完整剥离了依赖安卓底层特权（Device Owner/Lock Task）的锁屏 Kiosk 模式以实现应用完全通用化。
-- **清理内部资产**：清除了所有的定制包名签名（Bundle ID / Team ID），净化了包含企业内部 IP、私有域名和开发者名称的敏感注释/常量。
-- **瘦身构建产物**：白名单机制完美阻断了以往打包产生的数百兆 release 二进制包、本地构建日志、缓存垃圾、IDE 和私有工具配置文件。
+# 

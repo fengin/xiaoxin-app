@@ -1,5 +1,4 @@
 /// XiaoXin APP - WebSocket 协议服务
-/// 参考 xiaozhi-esp32 的 WebsocketProtocol 类设计
 library;
 
 import 'dart:async';

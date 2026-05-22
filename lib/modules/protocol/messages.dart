@@ -1,5 +1,4 @@
 /// XiaoXin APP - 小智协议消息定义
-/// 参考 xiaozhi-esp32/docs/websocket.md
 library;
 
 import 'dart:convert';

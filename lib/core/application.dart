@@ -1,5 +1,4 @@
 /// XiaoXin APP - 应用控制器
-/// 参考 xiaozhi-esp32 的 Application 类设计
 library;
 
 import 'dart:async';

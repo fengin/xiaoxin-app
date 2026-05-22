@@ -94,7 +94,7 @@ xiaoxin-app/lib/
 │   └── widgets/                       # 通用组件
 │
 ├── services/                           # 🔧 系统服务层
-│   └── foreground_service.dart        # 前台服务（Android保活）
+│   └── background_service.dart        # 后台/前台服务（Android保活）
 │
 └── utils/                              # 🟡 工具层
     ├── logger.dart                    # 日志工具
@@ -132,7 +132,7 @@ enum DeviceState {
 
 ### 前后台服务保活（Android）
 
-使用 `flutter_foreground_task` 实现 Android 前台服务：
+使用 `flutter_background_service` 和 `flutter_local_notifications` 实现 Android 前台服务：
 
 - **前台服务**：在通知栏显示持续通知，防止进程被系统回收
 - **触发时机**：语音会话开始时启动，会话结束或应用退到后台时可选停止
@@ -164,7 +164,7 @@ enum DeviceState {
 
 ## 文档
 
-- [需求说明](./需求说明.md)
+- [更新日志](./CHANGELOG.md)
 - [小智协议](小智协议/)
 - [语音对话技术说明](./语音对话技术说明.md)
 - [H5 语音交互开发指南](./H5_VOICE_SDK.md)
@@ -194,6 +194,21 @@ flutter pub get
 # 运行（需要连接设备或模拟器）
 flutter run
 ```
+
+### 界面切换（H5 / Native）
+
+本项目同时支持 **H5 容器界面（生产环境）** 与 **原生语音对话界面（开发/调试环境）**。您可以在 [loading_page.dart](file:///d:/code/work/xiaoxin/xiaoxin-app-opensource/lib/ui/pages/loading_page.dart) 中，通过切换目标页面来更改应用的默认启动主界面：
+
+```dart
+// lib/ui/pages/loading_page.dart
+
+// 📌 切换目标页：H5ContainerPage (生产) 或 DemoNativePage (调试)
+builder: (_) => const H5ContainerPage(), // 生产环境：跳转至 H5 容器页面，加载业务前端系统
+// builder: (_) => const DemoNativePage(),  // 调试环境：跳转至原生语音对话演示页面，方便底层链路调优
+```
+
+- **H5ContainerPage**：标准商业生产界面。加载配置的 WebSocket H5 前端，拥有完整的 H5 视图逻辑，通过 JS Bridge 桥接调用底层的语音对话生命周期。
+- **DemoNativePage**：纯原生调试界面。无需依赖任何 H5 网页或 WebView 渲染，能够最直观地实时显示 VAD 状态、离线热词唤醒匹配、WebSocket 连接状态及对麦克风录音的直接交互，极其适合音质调优、低延迟验证与开发测试。
 
 ---
 

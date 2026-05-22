@@ -42,4 +42,4 @@
 
 > [!NOTE]
 > 本项目的依赖均属于主流、宽松的开源协议（MIT, BSD, Apache 2.0），允许商业使用、修改和再分发。
-> 详细依赖版本和锁定信息，请参阅本仓库的 [pubspec.yaml](file:///d:/code/work/xiaoxin/xiaoxin-app-opensource/pubspec.yaml) 文件。
+> 详细依赖版本和锁定信息，请参阅本仓库的 [pubspec.yaml](pubspec.yaml) 文件。

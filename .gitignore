@@ -54,8 +54,6 @@ app.*.map.json
 /android/local.properties
 /android/.gradle/
 /android/captures/
-/android/gradlew
-/android/gradlew.bat
 /android/.externalNativeBuild
 /android/.cxx
 /android/app/build/
