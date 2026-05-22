@@ -107,6 +107,7 @@ dependency_overrides:
 flutter_launcher_icons:
   android: "mipmap"
   ios: true
+  remove_alpha_ios: true
   image_path: "assets/icon/standard.png"
 
 flutter:
