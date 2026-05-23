@@ -1,0 +1,131 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.6' # 兼容项目要求的 3.19+ 版本
+          channel: 'stable'
+          cache: true
+
+      - name: Configure Keystore (Optional)
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        run: |
+          if [ ! -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "Decompressing Keystore..."
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
+            echo "Generating key.properties..."
+            echo "storePassword=$ANDROID_STORE_PASSWORD" > android/key.properties
+            echo "keyPassword=$ANDROID_KEY_PASSWORD" >> android/key.properties
+            echo "keyAlias=$ANDROID_KEY_ALIAS" >> android/key.properties
+            echo "storeFile=app/keystore.jks" >> android/key.properties
+            echo "Android keystore configured successfully."
+          else
+            echo "No keystore secret detected. Falling back to debug signature."
+          fi
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 5
+
+  build-ios:
+    name: Build iOS IPA
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.6'
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build iOS App (Unsigned)
+        run: flutter build ios --release --no-codesign
+
+      - name: Create Unsigned IPA
+        run: |
+          mkdir -p Payload
+          mv build/ios/iphoneos/Runner.app Payload/
+          zip -r xiaoxin-app.ipa Payload
+
+      - name: Upload iOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: xiaoxin-app.ipa
+          retention-days: 5
+
+  release:
+    name: Create GitHub Release
+    needs: [build-android, build-ios]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download Android Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: build/artifacts
+
+      - name: Download iOS Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-ipa
+          path: build/artifacts
+
+      - name: Rename Android Artifact
+        run: |
+          # 将 app-release.apk 重命名为更友好的包名格式
+          mv build/artifacts/app-release.apk build/artifacts/xiaoxin-app.apk
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/artifacts/xiaoxin-app.apk
+            build/artifacts/xiaoxin-app.ipa
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
