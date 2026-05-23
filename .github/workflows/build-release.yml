@@ -26,7 +26,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6' # 兼容项目要求的 3.19+ 版本
+          flutter-version: '3.35.7' # 与本地开发环境保持一致（搭载 Dart 3.9.2）
           channel: 'stable'
           cache: true
 
@@ -73,7 +73,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'
+          flutter-version: '3.35.7' # 与本地开发环境保持一致（搭载 Dart 3.9.2）
           channel: 'stable'
           cache: true
 
