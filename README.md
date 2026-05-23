@@ -7,6 +7,8 @@
 AI 全书：[https://aibook.ren](https://aibook.ren/)  
 GitHub：https://github.com/fengin/xiaoxin-app
 
+官网：https://xiaoxin.chat
+
 ## 项目简介
 
 小新 APP 是一个基于 Flutter 开发的跨平台语音交互客户端，实现了与 [xiaozhi-esp32](https://github.com/78/xiaozhi-esp32) 相同的通信协议，可连接 xiaozhi-esp32-server-java/python/golang 后端服务。
